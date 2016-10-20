@@ -17,4 +17,15 @@ In the spirit of modular code, everything that communicates with the Firebase ba
 
 The `Server+Database.swift` file manages the communication between the app and Firebase for pushing/fetching of data. This is an **extension** of the `Server` enum, with the sole responsibility of handling networking.
 
+### FirebaseConvertible
 
+Model objects for this app conform to a custom protocol, the `FirebaseConvertible` protocol:
+
+```swift
+protocol FirebaseConvertible {
+  var json: [String: Any]
+  init(dictionary: [String: Any] 
+}
+```
+
+Since Firebase is JSON store, pushing/fetching of data always occurs in JSON format. `FirebaseConvertible` helps provide a standard for all model objects you want to create.
