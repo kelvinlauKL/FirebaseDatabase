@@ -13,6 +13,15 @@ final class PersonViewController: UIViewController {
   @IBOutlet fileprivate var tableView: UITableView!
   
   fileprivate var people: [Person] = []
+  
+  fileprivate let personRef = FIRDatabase.database().reference().child("people")
+  fileprivate var handles: [FIRDatabaseHandle] = []
+  
+  deinit {
+    handles.forEach {
+      personRef.removeObserver(withHandle: $0)
+    }
+  }
 }
 
 // MARK: - Life Cycle
@@ -20,13 +29,14 @@ extension PersonViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    let personRef = FIRDatabase.database().reference().child("people")
-    personRef.observe(.childAdded, with: { snapshot in
+    let personHandle = personRef.observe(.childAdded, with: { snapshot in
       guard let personDict = snapshot.value as? [String: Any] else { return print("couldn't cast") }
       let person = Person(dictionary: personDict)
       self.people.append(person)
       self.tableView.insertRows(at: [IndexPath(row: self.people.count - 1, section: 0)], with: .automatic)
     })
+    
+    handles.append(personHandle)
   }
 }
 
