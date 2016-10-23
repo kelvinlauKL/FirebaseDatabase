@@ -16,19 +16,14 @@ final class PersonViewController: UIViewController {
   
   fileprivate let personRef = FIRDatabase.database().reference().child("people")
   fileprivate var handles: [FIRDatabaseHandle] = []
-  
-  deinit {
-    handles.forEach {
-      personRef.removeObserver(withHandle: $0)
-    }
-  }
 }
 
 // MARK: - Life Cycle
 extension PersonViewController {
-  override func viewDidLoad() {
-    super.viewDidLoad()
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
     
+    // all handles should be created in `viewWillAppear` rather than `viewDidLoad` http://bit.ly/2etWxuF
     let personHandle = personRef.observe(.childAdded, with: { snapshot in
       guard let personDict = snapshot.value as? [String: Any] else { return print("couldn't cast") }
       let person = Person(dictionary: personDict)
@@ -37,6 +32,14 @@ extension PersonViewController {
     })
     
     handles.append(personHandle)
+  }
+  
+  override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    
+    handles.forEach {
+      personRef.removeObserver(withHandle: $0)
+    }
   }
 }
 
